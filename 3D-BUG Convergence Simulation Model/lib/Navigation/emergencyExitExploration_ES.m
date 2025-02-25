@@ -140,7 +140,7 @@ classdef emergencyExitExploration_ES < Navigation
                     end
                 else
                     % If no point of interest is found, set an arbitrary goal
-                    if isempty(closestPoint) && bug.isWallFollowing == false
+                    if isempty(closestPoint) && bug.isWallFollowing == false && isempty(bug.visitedSigns)
                         disp("Set Arbitrary Goal Query!")
                         bug.setArbitraryGoal(robot);
                     end
@@ -549,7 +549,7 @@ classdef emergencyExitExploration_ES < Navigation
                 end
             end
         end
-        
+
         function handleEmergencySign(bug, signIndex, robot)
             % Process actions upon reaching an emergency sign
             bug.visitedSigns = [bug.visitedSigns, signIndex]; % Mark sign as visited
