@@ -49,7 +49,7 @@ The 3D BUG algorithm works as follows:
 ## Usage
 
 Apart from downloading this repository, it also utilizes a Peter's Coke 2D BUG algorithm and some navigation functions from that repository. 
-[Please download it to run the simulations.](https://petercorke.com/toolboxes/robotics-toolbox/)
+[Please download it to be able to run the simulations.](https://petercorke.com/toolboxes/robotics-toolbox/)
 
 ## Monte Carlo Simulation
 
