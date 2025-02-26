@@ -8,7 +8,7 @@ This implementation guarantees convergence for pedestrian agents or robots navig
 
 The algorithm combines the classic BUG2 algorithm for planar route planning and a custom algorithm to find multi-floor paths to reach the goal floor which then we can implement BUG2. This adapted to work in three-dimensional spaces with multiple floors.
 
-## Simulation Features
+## Algorithm Features
 
 - **3D Path Planning**: Navigate through unknown multi-story buildings with complex floor layouts.
 - **Obstacle Avoidance**: Efficiently maneuver around obstacles on each floor.
