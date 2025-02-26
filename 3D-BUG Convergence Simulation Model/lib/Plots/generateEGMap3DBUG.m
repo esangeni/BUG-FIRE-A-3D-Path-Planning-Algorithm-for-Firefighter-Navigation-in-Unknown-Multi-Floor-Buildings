@@ -54,10 +54,10 @@ function [maps, figHandle] = generateEGMap3DBUG()
                 y2 = 9;    x2 = 76;
                 % Emergency Signs
                 xx1 = 86; yy1 = 29; direction1 = "back";
-                xx2 = 59; yy2 = 31; direction2 = "right";  % 59; yy2 = 29
+                xx2 = 59; yy2 = 31; direction2 = "right";
                 xx3 = 59; yy3 = 110; direction3 = "right";  
                 xx4 = 82; yy4 = 130; direction4 = "front";  
-                xx5 = 90; yy5 = 135; direction5 = "right"; 
+                xx5 = 90; yy5 = 135; direction5 = "right";  % xx5 = 90; yy5 = 135;
                 xx6 = 84; yy6 = 349; direction6 = "left";  
                 xx7 = 80; yy7 = 54; direction7 = "back";
                 xx8 = 81; yy8 = 9; direction8 = "left";
@@ -75,7 +75,7 @@ function [maps, figHandle] = generateEGMap3DBUG()
                 xx1 = 81; yy1 = 11; direction1 = "left";    % 82 9 
                 xx2 = 81; yy2 = 42; direction2 = "back";    % 86 42
                 xx3 = 86; yy3 = 130; direction3 = "front"; 
-                xx4 = 90; yy4 = 135; direction4 = "right";  
+                xx4 = 90; yy4 = 135; direction4 = "right";  % xx5 = 90; yy5 = 135;
                 xx5 = 84; yy5 = 349; direction5 = "left";
                 xx6 = 84;  yy6 = 170;  direction6 = "back"; 
     

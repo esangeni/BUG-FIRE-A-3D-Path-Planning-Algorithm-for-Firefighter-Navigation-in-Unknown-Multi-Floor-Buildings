@@ -23,7 +23,7 @@ left = round((screenSize(3) - width) / 2);
 bottom = round((screenSize(4) - height) / 2);
 
 %% Import table
-t = readtable('250iterResults_v170_d10_2025-02-21_20-34-42.xlsx');
+t = readtable('250iterResults_v170_d30_2025-02-24_16-28-25.xlsx');
 % problemIterations = t(t.GoalReached == false & t.ExecutionTime ~= 120, :);
 problemIterations = t(t.GoalReached == false & t.ExecutionTime == 120, :);
 
@@ -124,3 +124,86 @@ legend(h([1:2, end-1:end]), 'Location', 'best');
 view(3);
 
 disp(problemIterations)
+
+%% Case no errors are found
+if isempty(problemIterations)
+    % Initialize counters for each floor combination
+    floor_combinations = {...
+        '2nd-2nd', '3rd-3rd', '4th-4th', ...
+        '2nd-3rd', '2nd-4th', ...
+        '3rd-2nd', '3rd-4th', ...
+        '4th-2nd', '4th-3rd'...
+    };
+    counts = zeros(1, length(floor_combinations));
+    
+%     % Function to determine floor from z-coordinate
+%     getFloor = @(z) floor(z/100) + 2;  % Corrected floor calculation
+    
+    % Count occurrences of each floor combination
+    for i = 1:size(t, 1)
+        % Parse start point
+        startStr = t.StartPoint{i};
+        startPoint = str2num(startStr(2:end-1));
+        
+        % Parse goal point
+        goalStr = t.GoalPoint{i};
+        goalPoint = str2num(goalStr(2:end-1));
+        
+        % Determine start and goal floors
+        startFloor = startPoint(3)/100 + 2; % (2nd, 3rd, 4th floor)
+        goalFloor = goalPoint(3)/100 + 2; % (2nd, 3rd, 4th floor)
+        
+        % Increment appropriate counter
+        if startFloor == goalFloor % cases: '2nd-2nd', '3rd-3rd', '4th-4th'
+            counts(startFloor - 1) = counts(startFloor - 1) + 1;
+        else
+            if startFloor == 2 
+                if goalFloor == 3
+                    counts(4) = counts(4) + 1;
+                elseif goalFloor == 4
+                    counts(5) = counts(5) + 1;
+                end
+            elseif startFloor == 3
+                if goalFloor == 2
+                    counts(6) = counts(6) + 1;
+                elseif goalFloor == 4
+                    counts(7) = counts(7) + 1;
+                end
+            elseif startFloor == 4
+                if goalFloor == 2
+                    counts(8) = counts(8) + 1;
+                elseif goalFloor == 3
+                    counts(9) = counts(9) + 1;
+                end
+            end
+
+        end
+    end
+    
+    % Create bar plot
+    figure;
+    bar(counts);
+    xlabel('Floor Combinations');
+    ylabel('Number of Routes');
+    title('Distribution of Routes Across Floor Combinations');
+    xticks(1:length(floor_combinations));
+    xticklabels(floor_combinations);
+    xtickangle(45);
+    
+    % Add value labels on top of each bar
+    for i = 1:length(counts)
+        text(i, counts(i), num2str(counts(i)), 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+    end
+    
+    % Calculate and display percentages
+    total_routes = sum(counts);
+    percentages = (counts / total_routes) * 100;
+    
+    disp('Distribution of routes:');
+    for i = 1:length(floor_combinations)
+        fprintf('%s: %d (%.2f%%)\n', floor_combinations{i}, counts(i), percentages(i));
+    end
+    
+    % Display total number of routes
+    fprintf('\nTotal number of routes: %d\n', total_routes);
+end

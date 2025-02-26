@@ -273,7 +273,6 @@ classdef emergencyExitExploration_ES < Navigation
             bug.checkVisibleSigns(robot, coneVertices);
         end
 
-
         function [x, y] = rayCast(bug, start, angles, maxDist)
             x = zeros(1, length(angles));
             y = zeros(1, length(angles));
@@ -340,7 +339,6 @@ classdef emergencyExitExploration_ES < Navigation
             pause(0.01); % Adjust this value to control how long the polygon is visible
             delete(h);
         end
-
 
         function [newGoal, newGoalType] = checkVisiblePointsOfInterest(bug, robot)
             newGoal = [];
@@ -458,7 +456,7 @@ classdef emergencyExitExploration_ES < Navigation
             heading = pi/2; % -pi/2, pi, pi/2, 0
             
             % Set a temporary goal 20 units away in the chosen direction
-            tempGoalDistance = 100;
+            tempGoalDistance = 1000;
             tempGoal = robot + [tempGoalDistance * cos(heading); tempGoalDistance * sin(heading)];
             
             % Ensure the new goal is within the map boundaries
@@ -527,6 +525,23 @@ classdef emergencyExitExploration_ES < Navigation
                         closestPoint = signPos;
                         pointType = bug.signCells.direction{signIndex};
                     end
+                elseif ismember(signIndex, bug.visitedSigns) && (robot(1) == bug.signCells.location(signIndex,1) && robot(2) == bug.signCells.location(signIndex,2))
+                    % We're at a previously visited sign
+                    % Continue in the direction of the last visited sign
+                    disp('Visiting for a second time the same emergency sign. Continuing with previous emergency sign direction.')
+                    if ~isempty(bug.visitedSigns)
+                        lastVisitedSignIndex = bug.visitedSigns(end);
+                        lastDirection = bug.signCells.direction{lastVisitedSignIndex};
+                        angle = bug.getDirectionAngle(lastDirection);
+                        
+                        % Set a point in the direction of the last sign
+                        distanceToMove = 1000; % You can adjust this value
+                        newPoint = currentPosition + [cos(angle), sin(angle)] * distanceToMove;
+                        
+                        closestPoint = newPoint;
+                        pointType = "continue_" + lastDirection;
+                        return;
+                    end
                 end
             end
         
@@ -590,7 +605,7 @@ classdef emergencyExitExploration_ES < Navigation
                     disp("Updated goal to: " + pointType + " at (" + num2str(nextGoal(1)) + "," + num2str(nextGoal(2)) + ")");
                 else
                     % If no point of interest is visible, set a temporary goal in the suggested direction
-                    tempGoalDistance = 50; % Set a temporary goal 50 units away in the suggested direction
+                    tempGoalDistance = 1000; % Set a temporary goal 50 units away in the suggested direction
                     bug.goal = newRobotPos + [tempGoalDistance * cos(heading); tempGoalDistance * sin(heading)];
                     disp("No points of interest visible, setting temporary goal in direction: " + num2str(heading));
                 end
@@ -655,11 +670,6 @@ classdef emergencyExitExploration_ES < Navigation
             signIndex = find(all(abs(bug.signCells.location - position') < 1e-6, 2), 1);
         end
 
-
-
-
-
-
         function clearPath = checkClearPath(bug, start, goal)
             % Check if there's a clear path between start and goal
             direction = goal - start;
@@ -705,18 +715,40 @@ classdef emergencyExitExploration_ES < Navigation
                 return;
             end
 
-            % Check if the current position matches any sign cell
+
+
+
+%             % Check if the current position matches any sign cell
+%             signIndex = find(all(abs(bug.signCells.location - robot') < 1e-6, 2), 1);
+%             if ~isempty(signIndex)
+%                 disp("Stopped at predefined emergency sign cell: X="+ num2str(robot(1)) + ", Y=" + num2str(robot(2)));
+%                 bug.handleEmergencySign(signIndex, robot);
+%                 n = bug.start; % Set next position to the updated start position
+%                 return;
+%             end
+
+            % In the next function, replace the existing emergency sign check with:
             signIndex = find(all(abs(bug.signCells.location - robot') < 1e-6, 2), 1);
             if ~isempty(signIndex)
-                disp("Stopped at predefined emergency sign cell: X="+ num2str(robot(1)) + ", Y=" + num2str(robot(2)));
-                bug.handleEmergencySign(signIndex, robot);
-                n = bug.start; % Set next position to the updated start position
-                return;
+                if ismember(signIndex, bug.visitedSigns) && (robot(1) == bug.signCells.location(signIndex,1) && robot(2) == bug.signCells.location(signIndex,2))
+                    % Reset bug algorithm
+%                     n = robot; % Set next position to the updated start position
+                    disp('Here!');
+
+                elseif ~ismember(signIndex, bug.visitedSigns)
+                    disp("Stopped at predefined emergency sign cell: X="+ num2str(robot(1)) + ", Y=" + num2str(robot(2)));
+                    bug.handleEmergencySign(signIndex, robot);
+                    n = bug.start; % Set next position to the updated start position
+                    return;
+                end
             end
+            
+
 
             % Check for visible points of interest and update goal if necessary
             [newGoal, newGoalType] = bug.checkVisiblePointsOfInterest(robot);
-            if ~isempty(newGoal)
+            visitedSignsLocation = bug.signCells.location(bug.visitedSigns',:);
+            if ~isempty(newGoal) && ~ismember(newGoal, visitedSignsLocation,"rows")
                 if strcmp(newGoalType, 'exit')
                     bug.goal = newGoal';
                     bug.message('New goal set: Emergency exit at (%d,%d)', newGoal(1), newGoal(2));
