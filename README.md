@@ -29,18 +29,22 @@ The algorithm is designed and tested in a simulated environment (with Matlab) ba
 
 The 3D BUG algorithm works as follows:
 
+## Algorithm Description
+
+The 3D BUG algorithm works as follows:
+
 1. **Initialization**: Set start and goal points, which can be on different floors.
 2. **If Start and Goal on the same floor**
-   2.1. **M-line Calculation**: Compute a 3D M-line connecting start and goal points.
-   2.2. **Path Planning**:
-      - Move towards the goal along the M-line.
-      - If an obstacle is encountered, circumnavigate it while keeping track of the closest point to the goal.
-      - Return to the M-line at the closest point if a shorter path to the goal is found.
-      - Handle floor transitions when necessary.
-   2.3. **Termination**: Reach the goal or determine that it's unreachable.
+    1. **M-line Calculation**: Compute a 3D M-line connecting start and goal points.
+    2. **Path Planning**:
+        - Move towards the goal along the M-line.
+        - If an obstacle is encountered, circumnavigate it while keeping track of the closest point to the goal.
+        - Return to the M-line at the closest point if a shorter path to the goal is found.
+        - Handle floor transitions when necessary.
+    3. **Termination**: Reach the goal or determine that it's unreachable.
 3. **If Start and Goal on different floor**
-   3.1. **Emergency Stairs Exploration Algorithm**: Survey algorithm for emergency signs and emergency stairs to connect floors and reach same floor as the goal.
-   3.2. **Then move to point 2.**
+    1. **Emergency Stairs Exploration Algorithm**: Survey algorithm for emergency signs and emergency stairs to connect floors and reach same floor as the goal.
+    2. **Then move to point 2.**
 
 ## Usage
 
