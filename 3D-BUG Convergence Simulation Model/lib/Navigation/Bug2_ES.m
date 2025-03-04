@@ -322,8 +322,8 @@ classdef Bug2_ES < Navigation
                         delete(bug.visionConeHandle);
                     end
 
-                    % Plot the new vision cone
-                    bug.visionConeHandle = bug.plotVisionCone(n, heading);
+%                     % Plot the new vision cone
+%                     bug.visionConeHandle = bug.plotVisionCone(n, heading);
                 end
             end % step 1
 
@@ -346,8 +346,8 @@ classdef Bug2_ES < Navigation
                         delete(bug.visionConeHandle);
                     end
 
-                    % Plot the new vision cone
-                    bug.visionConeHandle = bug.plotVisionCone(n, heading);
+%                     % Plot the new vision cone
+%                     bug.visionConeHandle = bug.plotVisionCone(n, heading);
                 else
                     % we are at the end of the list of edge points, we
                     % are back where we started.  Step 2.c test.

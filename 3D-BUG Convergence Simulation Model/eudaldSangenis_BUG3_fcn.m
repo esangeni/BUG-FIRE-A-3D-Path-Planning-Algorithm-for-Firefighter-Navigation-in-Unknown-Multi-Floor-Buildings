@@ -1,4 +1,4 @@
-function [path, goal3DReached] = eudaldSangenis_BUG3_fcn(startPoint, goalPoint, visionRadius, visionAngle)
+function [total_path, trajectory_length, goal3DReached] = eudaldSangenis_BUG3_fcn(startPoint, goalPoint, visionRadius, visionAngle)
     goal3DReached = false;
     % Get the screen size
     screenSize = get(0, 'ScreenSize');
@@ -23,7 +23,7 @@ function [path, goal3DReached] = eudaldSangenis_BUG3_fcn(startPoint, goalPoint, 
 
     startHeight = startPoint(3);
     goalHeight = goalPoint(3);
-    path = [];
+    total_path = [];
     goalReached = false;
     exitStairsNumber = 0;
     
@@ -84,6 +84,7 @@ function [path, goal3DReached] = eudaldSangenis_BUG3_fcn(startPoint, goalPoint, 
     
     %% 3D BUG algorithm:
     % If the startHeight is the same as the goalHeight:
+    trajectory_length = 0;
     while true
         if startHeight == goalHeight
             switch startHeight
@@ -99,7 +100,14 @@ function [path, goal3DReached] = eudaldSangenis_BUG3_fcn(startPoint, goalPoint, 
             set(fig, 'Position', [left, bottom, width, height]);
             [path, goalReached] = bug.query(startPoint(1:2), goalPoint(1:2), 'animate', true); % animate the path from start to goal
     %         [path, goalReached] = bug.query(startPoint(1:2), goalPoint(1:2), 'movie', 'bug2_navigation.mp4');
-                
+            total_path = vertcat(total_path, path);
+
+            diff_path = diff(path);
+            % Calculate Euclidean distance for each step
+            step_distances = sqrt(sum(diff_path.^2, 2));
+            % Sum up all distances to get total trajectory length
+            trajectory_length = trajectory_length + sum(step_distances)/4;
+
             if ~isempty(path)
                 figure(figureHandle); % Bring the existing figure to the foreground
                 hold on;
@@ -150,7 +158,14 @@ function [path, goal3DReached] = eudaldSangenis_BUG3_fcn(startPoint, goalPoint, 
             set(fig, 'Position', [left, bottom, width, height]);
             [path, goalReached, exitStairsNumber] = bug.query(startPoint, goalPoint, 'animate', true, 'visionRadius', visionRadius, 'visionAngle', visionAngle);  % Run the pathfinding with vision cone
     %         [path, goalReached, exitStairsNumber] = bug.query(startPoint, goalPoint, 'movie', 'bugEmergencyExitExploration.mp4');
-    
+            total_path = vertcat(total_path, path);
+
+            diff_path = diff(path);
+            % Calculate Euclidean distance for each step
+            step_distances = sqrt(sum(diff_path.^2, 2));
+            % Sum up all distances to get total trajectory length
+            trajectory_length = trajectory_length + sum(step_distances)/4;
+            
             % Plot the path trajectory in green at Fig 1
             if ~isempty(path)
                 figure(figureHandle); % Bring the existing figure to the foreground

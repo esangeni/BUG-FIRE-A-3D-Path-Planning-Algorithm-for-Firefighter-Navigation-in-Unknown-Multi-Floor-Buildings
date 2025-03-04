@@ -35,7 +35,7 @@ if isempty(figureHandle)
 end
 
 %% Initial Parameters:
-scenario = 28;
+scenario = 30;
 switch scenario
     % Case BUG2 same floor Target
     case 1
@@ -104,13 +104,25 @@ switch scenario
         startPoint  = [97, 164, startHeight];  
         goalHeight = 100;               
         goalPoint  = [88, 164, goalHeight];
-    case 28 % Error: Stuck
+    case 28 % Iter 241
         startHeight = 200; 
-        startPoint  = [47, 162, startHeight];  
+        startPoint  = [85, 351, startHeight];  
         goalHeight = 0;               
-        goalPoint  = [93, 115, goalHeight];
+        goalPoint  = [78, 74, goalHeight];
+    case 29 % Iter 204
+        startHeight = 100; 
+        startPoint  = [89, 165, startHeight];  
+        goalHeight = 200;               
+        goalPoint  = [82, 10, goalHeight];
+    case 30 % Iter 139
+        startHeight = 0; 
+        startPoint  = [93, 57, startHeight];  
+        goalHeight = 200;               
+        goalPoint  = [85, 162, goalHeight];
 end
 
+visionRadius = 30;
+visionAngle = 170;
 
 %% Compute & Display the 3D m-line
 load('MAE_Occupancy_Map/EG-2Floor_indoor_polygon_MC_Simulation.mat');
@@ -151,17 +163,17 @@ for i = 1:length(polygons)
         z = ones(size(polygon, 1), 1) * (floorHeight);
         
         % Plot the polygon as a filled area
-        fill3(polygon(:,1), polygon(:,2), z, colors(i,:), 'FaceAlpha', 0.5);
+%         fill3(polygon(:,1), polygon(:,2), z, colors(i,:), 'FaceAlpha', 0.5);
         
         % Plot the polygon outline
-        plot3(polygon(:,1), polygon(:,2), z, 'k-', 'LineWidth', 2);
+%         plot3(polygon(:,1), polygon(:,2), z, 'k-', 'LineWidth', 2);
         
         % Plot holes for 2nd floor
         if i == 1
             for j = 1:length(holes)
                 hole = holes{j};
                 z_hole = zeros(size(hole, 1), 1) + floorHeight +0.1;
-                fill3(hole(:,1), hole(:,2), z_hole, 'w-', 'LineWidth', 3);
+%                 fill3(hole(:,1), hole(:,2), z_hole, 'w-', 'LineWidth', 3);
             end
         end
     end
@@ -219,7 +231,8 @@ plot3(goalPoint(1), goalPoint(2), goalHeight, 'p', 'MarkerSize', 8, 'MarkerFaceC
 
 %% 3D BUG algorithm:
 tStart = tic;
-
+total_path = [];
+trajectory_length = 0;
 % If the startHeight is the same as the goalHeight:
 while true
     if startHeight == goalHeight
@@ -236,7 +249,19 @@ while true
         set(fig, 'Position', [left, bottom, width, height]);
         [path, goalReached] = bug.query(startPoint(1:2), goalPoint(1:2), 'animate', true); % animate the path from start to goal
 %         [path, goalReached] = bug.query(startPoint(1:2), goalPoint(1:2), 'movie', 'bug2_navigation.mp4');
-            
+        total_path = vertcat(total_path, path);
+
+        % Calculate differences between consecutive points
+        diff_path = diff(path);
+        
+        % Calculate Euclidean distance for each step
+        step_distances = sqrt(sum(diff_path.^2, 2));
+        
+        % Sum up all distances to get total trajectory length
+        trajectory_length = trajectory_length + sum(step_distances)/4;
+        % Display the result
+        fprintf('The estimated trajectory length in 2d bug is approximately %.2f units.\n', trajectory_length);
+
         if ~isempty(path)
             figure(figureHandle); % Bring the existing figure to the foreground
             hold on;
@@ -256,12 +281,12 @@ while true
             disp("Robot is trapped, we coudn't find a reachable path to the target.")
             tEnd = toc(tStart);
             disp("Time Elapsed to implement the 3D Bug algorithm: " + num2str(tEnd))
-            return;
+            break;
         else
             disp("Target found!")
             tEnd = toc(tStart);
             disp("Time Elapsed to implement the 3D Bug algorithm: " + num2str(tEnd))
-            return;
+            break;
         end % else
     end
     % If the startHeight is different form the goalHeight:
@@ -288,8 +313,20 @@ while true
         fig = figure;
         set(fig, 'Position', [left, bottom, width, height]);
 %         [path, goalReached, exitStairsNumber] = bug.query(startPoint, goalPoint, 'animate', true);  % Run the pathfinding with vision cone
-        [path, goalReached, exitStairsNumber] = bug.query(startPoint, goalPoint, 'animate', true, 'visionRadius', 30, 'visionAngle', 170);  % Run the pathfinding with vision cone
+        [path, goalReached, exitStairsNumber] = bug.query(startPoint, goalPoint, 'animate', true, 'visionRadius', visionRadius, 'visionAngle', visionAngle);  % Run the pathfinding with vision cone
 %         [path, goalReached, exitStairsNumber] = bug.query(startPoint, goalPoint, 'movie', 'bugEmergencyExitExploration.mp4');
+
+        total_path = vertcat(total_path, path);
+                % Calculate differences between consecutive points
+        diff_path = diff(path);
+        
+        % Calculate Euclidean distance for each step
+        step_distances = sqrt(sum(diff_path.^2, 2));
+        
+        % Sum up all distances to get total trajectory length
+        trajectory_length = trajectory_length + sum(step_distances)/4;
+        % Display the result
+        fprintf('The estimated trajectory length in 3d bug is approximately %.2f units.\n', trajectory_length);
 
         % Plot the path trajectory in green at Fig 1
         if ~isempty(path)
@@ -335,3 +372,36 @@ while true
         end
     end
 end
+
+
+% Hold the current figure to allow overlaying additional plots
+figureHandle = findobj('Type', 'Figure', 'Name', '3D Trajectory MAE UCI');
+if isempty(figureHandle)
+    error('The figure generated by generateEGMap3DBUG does not exist. Ensure the function has executed correctly.');
+end
+
+% Apply axis label modifications to the current figure
+figure(gcf);  % Make sure we're working with the current figure
+ax = gca;
+xlabel('$X,\, \mathrm{m}$', 'Interpreter', 'latex');
+ylabel('$Y,\, \mathrm{m}$', 'Interpreter', 'latex');
+zlabel('', 'Interpreter', 'latex')
+title('Iter 139 r=30', 'Interpreter', 'latex');
+axis equal;
+grid on;
+
+% Convert pixel ticks to meter values for x-axis
+xticks_pixels = ax.XTick;
+xticks_meters = xticks_pixels * 0.25;
+xticks(xticks_pixels);
+xticklabels(arrayfun(@(x) sprintf('%.1f', x), xticks_meters, 'UniformOutput', false));
+
+% Set y-axis ticks every 10 meters
+ylim([0, 365]);  % Set y-axis limits
+yticks_meters = 0:10:365;  % Create ticks every 10 meters
+yticks_pixels = yticks_meters / 0.25;  % Convert meters to pixels
+yticks(yticks_pixels);
+yticklabels(arrayfun(@(x) sprintf('%.1f', x), yticks_meters, 'UniformOutput', false));
+
+disp(['Length path: ' num2str(length(total_path)/4)])
+disp(['Length path 2: ' num2str(trajectory_length)])
